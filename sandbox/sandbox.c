@@ -27,12 +27,14 @@ int	sandbox(void (*f)(void), unsigned int timeout, bool verbose)
 		f();
 		_exit(0);
 	}
+	// to check the signals
 	struct sigaction sa = {0};
 	sa.sa_handler = do_nothing;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;
 	if (sigaction(SIGALRM, &sa, NULL) < 0)
 		return (-1);
+	// funcion timeout
 	alarm(timeout);
 	pid_t r = waitpid(pid, &status, 0);
 	if (r < 0)
@@ -48,6 +50,7 @@ int	sandbox(void (*f)(void), unsigned int timeout, bool verbose)
 		return (-1);
 	}
 	alarm(0);
+	// bad exit code/status
 	if (WIFEXITED(status))
 	{
 		int code = WEXITSTATUS(status);
@@ -61,6 +64,7 @@ int	sandbox(void (*f)(void), unsigned int timeout, bool verbose)
 			printf("Bad function: exited with code %d\n", code);
 		return (0);
 	}
+	// fucntion time out
 	if (WIFSIGNALED(status))
 	{
 		int sig = WTERMSIG(status);
@@ -72,7 +76,9 @@ int	sandbox(void (*f)(void), unsigned int timeout, bool verbose)
 		else
 		{
 			if (verbose)
-				
+				printf("Bad function: %s\n", strsignal(sig));
 		}
+		return (0);
 	}
+	return (-1);
 }
