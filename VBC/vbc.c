@@ -3,17 +3,17 @@
 #include <ctype.h>
 
 typedef struct node {
-    enum { 
-        ADD, 
+    enum {
+        ADD,
         MULTI,
-        VAL 
+        VAL
     }   type;
     int           val;
     struct node   *l;
     struct node   *r;
-} node;
+}	node;
 
-node *new_node(node n)
+node	*new_node(node n)
 {
     node *ret = calloc(1, sizeof(*ret));  // MODIFIED: sizeof(*ret) instead sizeof(n)
     if (!ret)
@@ -22,18 +22,19 @@ node *new_node(node n)
     return ret;
 }
 
-void destroy_tree(node *n)
+void	destroy_tree(node *n)
 {
     if (!n)
-        return;
-    if (n->type != VAL) {
+        return ;
+    if (n->type != VAL)
+	{
         destroy_tree(n->l);
         destroy_tree(n->r);
     }
     free(n);
 }
 
-void unexpected(char c)
+void	unexpected(char c)
 {
     if (c)
         printf("Unexpected token '%c'\n", c);
@@ -44,7 +45,8 @@ void unexpected(char c)
 /* MODIFIED: accept/expect remises à la signature d’origine, sans global */
 int accept(char **s, char c)
 {
-    if (**s == c) {
+    if (**s == c)
+	{
         (*s)++;
         return 1;
     }
