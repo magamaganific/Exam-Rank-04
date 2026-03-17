@@ -1,23 +1,23 @@
 #include <unistd.h>
 #include <stdlib.h>
-#include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 int    picoshell(char **cmds[])
 {
-	int	i = 0;
-	int	status = 0;
-	int	ret = 0;
-	int	fd[2];
-	int	in_fd = 0;
-	pid_t	pid;
+	int i = 0;
+	int fd[2];
+	int status = 0;
+	int in_fd = 0;
+	int ret = 0;
+	pid_t pid;
 
-	while (cmds[i])
+	while(cmds[i])
 	{
 		if (cmds[i + 1])
 		{
-			if (pipe(fd) == -1)
-				return (1);
+			if(pipe(fd) < 0)
+				return 1;
 		}
 		else
 		{
@@ -31,15 +31,15 @@ int    picoshell(char **cmds[])
 				close(fd[0]);
 			if (fd[1] != -1)
 				close(fd[1]);
-			if (in_fd != -1)
+			if (in_fd != 0)
 				close(in_fd);
-			return (1);
+			return 1;
 		}
 		if (pid == 0)
 		{
 			if (in_fd != 0)
 			{
-				if (dup2(in_fd, 0) == -1)
+				if(dup2(in_fd, 0) == -1)
 					exit(1);
 				close(in_fd);
 			}
@@ -47,15 +47,15 @@ int    picoshell(char **cmds[])
 			{
 				if (dup2(fd[1], 1) == -1)
 					exit(1);
-				close(fd[1]);
 				close(fd[0]);
+				close(fd[1]);
 			}
 			execvp(cmds[i][0], cmds[i]);
 			exit(1);
 		}
 		else
 		{
-			if (in_fd != -1)
+			if (in_fd != 0)
 				close(in_fd);
 			if (fd[1] != -1)
 				close(fd[1]);
@@ -70,5 +70,5 @@ int    picoshell(char **cmds[])
 		if (!WIFEXITED(status))
 			ret = 1;
 	}
-	return (ret);
+	return(ret);
 }
