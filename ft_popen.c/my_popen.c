@@ -4,24 +4,24 @@
 
 int ft_popen(const char *file, char *const argv[], char type)
 {
-	if(!file || !argv || (type != 'r' && type != 'w'))
-		return -1;
+	if (!file || !argv || (type != 'r' && type != 'w'))
+		return (-1);
 	int fd[2];
-	pid_t pid;
 	if (pipe(fd) < 0)
-		return -1;
-	pid = fork();
+		return (-1);
+	pid_t pid = fork();
+	
 	if (pid < 0)
 	{
 		close(fd[1]);
 		close(fd[0]);
-		return -1;
+		return (-1);
 	}
 	if (pid == 0)
 	{
 		if (type == 'r')
 		{
-			if (dup2(fd[1], STDOUT_FILENO) < 0)
+			if(dup2(fd[1], STDOUT_FILENO) < 0)
 			{
 				close(fd[0]);
 				close(fd[1]);
@@ -30,7 +30,7 @@ int ft_popen(const char *file, char *const argv[], char type)
 		}
 		else
 		{
-			if (dup2(fd[0], STDIN_FILENO) < 0)
+			if(dup2(fd[0], STDIN_FILENO) < 0)
 			{
 				close(fd[0]);
 				close(fd[1]);
@@ -39,21 +39,14 @@ int ft_popen(const char *file, char *const argv[], char type)
 		}
 		close(fd[0]);
 		close(fd[1]);
-		execvp(file, args);
+		execvp(file, argv);
 		exit(-1);
 	}
-	else
+	if(type = 'r')
 	{
-		if (type == 'r')
-		{
-			close(fd[1])
-			return (fd[0]);
-		}
-		else
-		{
-			close(fd[0]);
-			return (fd[1]);
-		}
+		close(fd[0]);
+		return(fd[1]);
 	}
-	return -1;
+	close(fd[1]);
+	return(fd[0]);
 }
