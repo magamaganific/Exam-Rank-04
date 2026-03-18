@@ -63,16 +63,62 @@ int	expect(FILE *stream, char c)
 	return 0;
 }
 
+void	free_json(json j)
+{
+	switch (j.type)
+	{
+		case MAP:
+			for (size_t i = 0; i < j.map.size; i++)
+			{
+				free(j.map.data[i].key);
+				free_json(j.map.data[i].value);
+			}
+			free(j.map.data);
+			break ;
+		case STRING:
+			free(j.string);
+			break ;
+		default:
+			break ;
+	}
+}
+
+void	serialize(json j)
+{
+	switch (j.type)
+	{
+		case INTEGER:
+			printf("%d", j.integer);
+			break ;
+		case STRING:
+			putchar('"');
+			for (int i = 0; j.string[i]; i++)
+			{
+				if (j.string[i] == '\\' || j.string[i] == '"')
+					putchar('\\');
+				putchar(j.string[i]);
+			}
+			putchar('"');
+			break ;
+		case MAP:
+			putchar('{');
+			for (size_t i = 0; i < j.map.size; i++)
+			{
+				if (i != 0)
+					putchar(',');
+				serialize((json){.type = STRING, .string = j.map.data[i].key});
+				putchar(':');
+				serialize(j.map.data[i].value);
+			}
+			putchar('}');
+			break ;
+	}
+}
 
 /* ---------- PARTIE AJOUTÉE : PARSING JSON (sans free_json) ---------- */
 
 /* forward declarations */
-void		free_json(json j);
 int			argo(json *dst, FILE *stream);
-int			peek(FILE *stream);
-void		unexpected(FILE *stream);
-int			accept(FILE *stream, char c);
-int			expect(FILE *stream, char c);
 static int	parse_value(json *dst, FILE *stream);
 static int	parse_integer(json *dst, FILE *stream);
 static int	parse_string(json *dst, FILE *stream);
@@ -255,59 +301,7 @@ err:
 	return -1;
 }
 
-// back to given code
-
-void	free_json(json j)
-{
-	switch (j.type)
-	{
-		case MAP:
-			for (size_t i = 0; i < j.map.size; i++)
-			{
-				free(j.map.data[i].key);
-				free_json(j.map.data[i].value);
-			}
-			free(j.map.data);
-			break ;
-		case STRING:
-			free(j.string);
-			break ;
-		default:
-			break ;
-	}
-}
-
-void	serialize(json j)
-{
-	switch (j.type)
-	{
-		case INTEGER:
-			printf("%d", j.integer);
-			break ;
-		case STRING:
-			putchar('"');
-			for (int i = 0; j.string[i]; i++)
-			{
-				if (j.string[i] == '\\' || j.string[i] == '"')
-					putchar('\\');
-				putchar(j.string[i]);
-			}
-			putchar('"');
-			break ;
-		case MAP:
-			putchar('{');
-			for (size_t i = 0; i < j.map.size; i++)
-			{
-				if (i != 0)
-					putchar(',');
-				serialize((json){.type = STRING, .string = j.map.data[i].key});
-				putchar(':');
-				serialize(j.map.data[i].value);
-			}
-			putchar('}');
-			break ;
-	}
-}
+// back to given code---------------------------------------------------------------
 
 int	main(int argc, char **argv)
 {
