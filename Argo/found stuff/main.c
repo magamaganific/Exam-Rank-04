@@ -1,7 +1,5 @@
 #include "argo.h"
 
-
-
 void	free_json(json j)
 {
 	switch (j.type)
