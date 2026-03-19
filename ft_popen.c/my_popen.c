@@ -43,11 +43,11 @@ int ft_popen(const char *file, char *const argv[], char type)
 		execvp(file, argv);
 		exit(-1);
 	}
-		if (type == 'r')
-		{
-			close(fd[1]);
-			return(fd[0]);
-		}
-		close(fd[0]);
-		return(fd[1]);
+	if (type == 'r')
+	{
+		close(fd[1]);
+		return(fd[0]);
+	}
+	close(fd[0]);
+	return(fd[1]);
 }
