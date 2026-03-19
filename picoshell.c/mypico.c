@@ -7,7 +7,7 @@ int    picoshell(char **cmds[])
 {
 	int i = 0;
 	int status;
-	int ret;
+	int ret = 0;
 	int fd[2];
 	int in_fd = 0;
 	pid_t pid;
@@ -27,10 +27,10 @@ int    picoshell(char **cmds[])
 		pid = fork();
 		if(pid < 0)
 		{
-			if (fd[1] != -1)
-				close(fd[1]);
 			if (fd[0] != -1)
 				close(fd[0]);
+			if (fd[1] != -1)
+				close(fd[1]);
 			if (in_fd != 0)
 				close(in_fd);
 			return(1);
@@ -63,11 +63,11 @@ int    picoshell(char **cmds[])
 			i++;
 		}
 	}
-	while(wait(&status))
+	while(wait(&status) > 0)
 	{
 		if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
 			ret = 1;
-		if (!WEXITSTATUS(status))
+		else if (!WIFEXITED(status))
 			ret = 1;
 	}
 	return(ret);
