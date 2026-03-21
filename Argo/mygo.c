@@ -116,32 +116,7 @@ static int parse_integer(json *dst, FILE *stream);
 static int parse_string(json *dst, FILE *stream);
 static int parse_map(json *dst, FILE *stream);
 
-int argo(json *dst, FILE *stream)
-{
-	if (parse_value(dst, stream) == -1)
-		return(-1);
-	if (peek(stream) != EOF)
-	{
-		unexpected(stream);
-		free_json(*dst);
-		return(-1);
-	}
-	return (1);
-}
 
-static int parse_value(json *dst, FILE *stream)
-{
-	int c = peek(stream);
-
-	if (c == '"')
-		return (parse_string(dst, stream));
-	if (c == '{')
-		return (parse_map(dst, stream));
-	if (c == '-' || isdigit(c))
-		return(parse_integer(dst, stream));
-	unexpected(stream);
-	return(-1);
-}
 
 static int parse_integer(json *dst, FILE *stream)
 {
@@ -274,6 +249,33 @@ err:
 	}
 	free(arr);
 	return(-1);
+}
+
+static int parse_value(json *dst, FILE *stream)
+{
+	int c = peek(stream);
+
+	if (c == '"')
+		return (parse_string(dst, stream));
+	if (c == '{')
+		return (parse_map(dst, stream));
+	if (c == '-' || isdigit(c))
+		return(parse_integer(dst, stream));
+	unexpected(stream);
+	return(-1);
+}
+
+int argo(json *dst, FILE *stream)
+{
+	if (parse_value(dst, stream) == -1)
+		return(-1);
+	if (peek(stream) != EOF)
+	{
+		unexpected(stream);
+		free_json(*dst);
+		return(-1);
+	}
+	return (1);
 }
 
 int	main(int argc, char **argv)
