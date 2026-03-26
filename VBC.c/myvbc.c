@@ -63,38 +63,38 @@ int expect(char **s, char c)
 
 //...
 
-static node *parse_expr_r(char **s);
+static node *parse_add(char **s);
 
-static node *parse_factor(char **s)
+static node *parse_factor(char **s);
 {
-	if (isdigit((unsigned char)**s))
+	if (isdigit((unsigned char) **s))
 	{
-		node n = {.type = VAL, .val = **s - '0', .l = NULL, .r = NULL};
+		node *n = {.type = VAL, .val = **s - '0', .l = NULL, .r = NULL};
 		(*s)++;
-		return(new_node(n));
+		return(n);
 	}
 	if (accept(s, '('))
 	{
-		node *e = parse_expr_r(s);
+		node *e = parse_add(s);
 		if (!e)
 			return (NULL);
 		if (!expect(s, ')'))
 		{
-			destroy_tree(e);
+			destroy_tree(n);
 			return(NULL);
 		}
 		return(e);
 	}
 	unexpected(**s);
-	return(NULL);
+	return (NULL);
 }
 
-static node *parse_term(char **s)
+static node *parse_multi(char **s)
 {
 	node *left = parse_factor(s);
 	if (!left)
 		return(NULL);
-	while (accept(s, '*'))
+	while(accept(s, '*'))
 	{
 		node *right = parse_factor(s);
 		if (!right)
@@ -102,22 +102,22 @@ static node *parse_term(char **s)
 			destroy_tree(left);
 			return (NULL);
 		}
-		node n = { .type = MULTI, .l = left, .r = right };
+		node n = {.type = MULTI, .l = left, .r = right};
 		left = new_node(n);
 		if (!left)
 			return(NULL);
 	}
-	return (left);
+	return(left);
 }
 
-static node *parse_expr_r(char **s)
+static node *parse_add(char **s)
 {
-	node *left = parse_term(s);
+	node *left = parse_multi(s);
 	if (!left)
 		return(NULL);
-	while (accept(s, '+'))
+	while(accept(s, '+'))
 	{
-		node *right = parse_term(s);
+		node *right = parse_multi(s);
 		if (!right)
 		{
 			destroy_tree(left);
@@ -128,21 +128,22 @@ static node *parse_expr_r(char **s)
 		if (!left)
 			return(NULL);
 	}
-	return (left);
+	return(left);
 }
 
 node    *parse_expr(char *s)
 {
     //...
 	char *p = s;
-	node *ret = parse_expr_r(&p);
+	node *ret;
+	ret = parse_add(&s);
 	if (!ret)
-		return(NULL);
+		return (NULL);
 	if (*p)
 	{
 		unexpected(*p);
 		destroy_tree(ret);
-		return(NULL);
+		return (NULL);
 	}
 	return(ret);
 }
