@@ -65,13 +65,13 @@ int expect(char **s, char c)
 
 static node *parse_add(char **s);
 
-static node *parse_factor(char **s);
+static node *parse_factor(char **s)
 {
 	if (isdigit((unsigned char) **s))
 	{
-		node *n = {.type = VAL, .val = **s - '0', .l = NULL, .r = NULL};
+		node n = {.type = VAL, .val = **s - '0', .l = NULL, .r = NULL};
 		(*s)++;
-		return(n);
+		return(new_node(n));
 	}
 	if (accept(s, '('))
 	{
@@ -80,7 +80,7 @@ static node *parse_factor(char **s);
 			return (NULL);
 		if (!expect(s, ')'))
 		{
-			destroy_tree(n);
+			destroy_tree(e);
 			return(NULL);
 		}
 		return(e);
@@ -136,7 +136,7 @@ node    *parse_expr(char *s)
     //...
 	char *p = s;
 	node *ret;
-	ret = parse_add(&s);
+	ret = parse_add(&p);
 	if (!ret)
 		return (NULL);
 	if (*p)
