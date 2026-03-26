@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <malloc.h>
 #include <ctype.h>
@@ -40,12 +39,12 @@ void    unexpected(char c)
     if (c)
         printf("Unexpected token '%c'\n", c);
     else
-        printf("Unexpected end of input\n");
+        printf("Unexpected end of file\n");
 }
 
 int accept(char **s, char c)
 {
-    if (**s == c)
+    if (**s ==  c)
     {
         (*s)++;
         return (1);
@@ -67,17 +66,17 @@ static node *parse_add(char **s);
 
 static node *parse_factor(char **s)
 {
-	if (isdigit((unsigned char) **s))
+	if (isdigit((unsigned char)**s))
 	{
 		node n = {.type = VAL, .val = **s - '0', .l = NULL, .r = NULL};
 		(*s)++;
 		return(new_node(n));
 	}
-	if (accept(s, '('))
+	if(accept(s, '('))
 	{
 		node *e = parse_add(s);
 		if (!e)
-			return (NULL);
+			return(NULL);
 		if (!expect(s, ')'))
 		{
 			destroy_tree(e);
@@ -86,21 +85,21 @@ static node *parse_factor(char **s)
 		return(e);
 	}
 	unexpected(**s);
-	return (NULL);
+	return(NULL);
 }
 
 static node *parse_multi(char **s)
 {
 	node *left = parse_factor(s);
 	if (!left)
-		return(NULL);
+		return (NULL);
 	while(accept(s, '*'))
 	{
 		node *right = parse_factor(s);
 		if (!right)
 		{
 			destroy_tree(left);
-			return (NULL);
+			return(NULL);
 		}
 		node n = {.type = MULTI, .l = left, .r = right};
 		left = new_node(n);
@@ -114,14 +113,14 @@ static node *parse_add(char **s)
 {
 	node *left = parse_multi(s);
 	if (!left)
-		return(NULL);
+		return (NULL);
 	while(accept(s, '+'))
 	{
 		node *right = parse_multi(s);
 		if (!right)
 		{
 			destroy_tree(left);
-			return (NULL);
+			return(NULL);
 		}
 		node n = {.type = ADD, .l = left, .r = right};
 		left = new_node(n);
@@ -135,17 +134,16 @@ node    *parse_expr(char *s)
 {
     //...
 	char *p = s;
-	node *ret;
-	ret = parse_add(&p);
+	node *ret = parse_add(&p);
 	if (!ret)
 		return (NULL);
-	if (*p)
-	{
+    if (*p) 
+    {
+        destroy_tree(ret);
 		unexpected(*p);
-		destroy_tree(ret);
-		return (NULL);
-	}
-	return(ret);
+        return (NULL);
+    }
+    return (ret);
 }
 
 int eval_tree(node *tree)
@@ -159,7 +157,6 @@ int eval_tree(node *tree)
         case VAL:
             return (tree->val);
     }
-	return(0);
 }
 
 int main(int argc, char **argv)
