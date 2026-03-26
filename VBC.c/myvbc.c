@@ -62,9 +62,8 @@ int expect(char **s, char c)
 }
 
 //...
-static node *parse_factor(char **s);
-static node *parse_addition(char **s);
-static node *parse_multi(char **s);
+
+static node *parse_expr_r(char **s);
 
 static node *parse_factor(char **s)
 {
@@ -78,7 +77,7 @@ static node *parse_factor(char **s)
 	{
 		node *e = parse_expr_r(s);
 		if (!e)
-			return(NULL);
+			return (NULL);
 		if (!expect(s, ')'))
 		{
 			destroy_tree(e);
@@ -86,60 +85,60 @@ static node *parse_factor(char **s)
 		}
 		return(e);
 	}
-	unexpected(s);
+	unexpected(**s);
 	return(NULL);
 }
 
-static node *parse_multi(char **s)
+static node *parse_term(char **s)
 {
 	node *left = parse_factor(s);
-	if(!left)
+	if (!left)
 		return(NULL);
-	while(accept(s, '*'))
+	while (accept(s, '*'))
 	{
 		node *right = parse_factor(s);
-		if (right)
+		if (!right)
 		{
-			detroy_tree(left);
-			return(NULL);
+			destroy_tree(left);
+			return (NULL);
 		}
-		node n = {.type = MULTI, .l = left, .r = right};
+		node n = { .type = MULTI, .l = left, .r = right };
 		left = new_node(n);
 		if (!left)
-			return (NULL);
+			return(NULL);
 	}
-	return(left);
+	return (left);
 }
 
-static node *parse_addition(char **s)
+static node *parse_expr_r(char **s)
 {
-	node *left = parse_multi(s);
-	if(!left)
+	node *left = parse_term(s);
+	if (!left)
 		return(NULL);
-	while(accept(s, '+'))
+	while (accept(s, '+'))
 	{
-		node *right = parse_multi(s);
-		if (right)
+		node *right = parse_term(s);
+		if (!right)
 		{
-			detroy_tree(left);
-			return(NULL);
+			destroy_tree(left);
+			return (NULL);
 		}
 		node n = {.type = ADD, .l = left, .r = right};
 		left = new_node(n);
 		if (!left)
-			return (NULL);
+			return(NULL);
 	}
-	return(left);
+	return (left);
 }
 
 node    *parse_expr(char *s)
 {
     //...
 	char *p = s;
-	node *ret = parse_addition(*s);
+	node *ret = parse_expr_r(&p);
 	if (!ret)
-		return (NULL);
-	if(*p)
+		return(NULL);
+	if (*p)
 	{
 		unexpected(*p);
 		destroy_tree(ret);
@@ -159,7 +158,7 @@ int eval_tree(node *tree)
         case VAL:
             return (tree->val);
     }
-	return(0)
+	return(0);
 }
 
 int main(int argc, char **argv)
